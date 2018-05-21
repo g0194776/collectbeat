@@ -23,6 +23,6 @@ fields:
   kubernetes:
     cluster: 
       name: ${K8S_CLUSTER}
-
+logging.level: ${FB_LOGLEVEL}
 output.elasticsearch:
   hosts: ['${ES_HOST}:${ES_PORT}']
