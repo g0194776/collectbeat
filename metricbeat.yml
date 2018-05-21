@@ -28,5 +28,5 @@ fields:
       name: ${NODE}
 
 output.elasticsearch:
-  hosts: ['10.203.40.99:9200']
+  hosts: ['${ES_HOST}']
 
