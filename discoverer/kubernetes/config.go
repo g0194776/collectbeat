@@ -13,6 +13,7 @@ type kubeDiscovererConfig struct {
 	KubeConfig         string                  `config:"kube_config"`
 	Host               string                  `config:"host"`
 	Namespace          string                  `config:"namespace"`
+	ApiServer          string                  `config:"api_server"`
 	SyncPeriod         time.Duration           `config:"sync_period"`
 	Builders           PluginConfig            `config:"builders"`
 	DefaultBuilders    Enabled                 `config:"default_builders"`

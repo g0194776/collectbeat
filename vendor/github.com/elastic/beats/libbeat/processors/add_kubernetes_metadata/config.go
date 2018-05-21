@@ -11,6 +11,7 @@ type kubeAnnotatorConfig struct {
 	KubeConfig string        `config:"kube_config"`
 	Host       string        `config:"host"`
 	Namespace  string        `config:"namespace"`
+	ApiServer  string 		 `config:"api_server"`
 	SyncPeriod time.Duration `config:"sync_period"`
 	// Annotations are kept after pod is removed, until they haven't been accessed
 	// for a full `cleanup_timeout`:

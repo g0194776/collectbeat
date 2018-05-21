@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net"
+	"net/http"
 	"os"
 	"time"
 
@@ -71,7 +73,13 @@ func newKubernetesDiscoverer(cfg *common.Config) (discoverer.Discoverer, error) 
 	appenders := []appender.Appender{}
 
 	var client *k8s.Client
-	if config.InCluster == true {
+
+	if config.ApiServer != "" {
+		client, err = newClient(config.ApiServer, config.Namespace)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to create client by apiserver: %v", err)
+		}
+	} else if config.InCluster == true {
 		client, err = k8s.NewInClusterClient()
 		if err != nil {
 			return nil, fmt.Errorf("Unable to get in cluster configuration")
@@ -201,3 +209,25 @@ func (k *kubernetesDiscoverer) Stop() {
 }
 
 func (k *kubernetesDiscoverer) String() string { return "kubernetes" }
+
+func newClient(apiserver, namespace string) (*k8s.Client, error) {
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+
+	client := &k8s.Client{
+		Endpoint:  apiserver,
+		Namespace: namespace,
+		Client: &http.Client{
+			Transport: transport,
+		},
+	}
+	return client, nil
+}

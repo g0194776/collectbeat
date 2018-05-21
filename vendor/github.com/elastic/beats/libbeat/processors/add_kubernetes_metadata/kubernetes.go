@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 	"time"
+	"net/http"
+	"net"
 
 	"github.com/elastic/beats/libbeat/beat"
 	"github.com/elastic/beats/libbeat/common"
@@ -84,7 +86,12 @@ func newKubernetesAnnotator(cfg *common.Config) (processors.Processor, error) {
 	}
 
 	var client *k8s.Client
-	if config.InCluster == true {
+	if config.ApiServer != "" {
+		client, err = newClient(config.ApiServer, config.Namespace)
+		if err != nil {
+			return nil, fmt.Errorf("Unable to create client by apiserver: %v", err)
+		}
+	} else if config.InCluster == true {
 		client, err = k8s.NewInClusterClient()
 		if err != nil {
 			return nil, fmt.Errorf("Unable to get in cluster configuration")
@@ -168,8 +175,30 @@ func (k *kubernetesAnnotator) Run(event *beat.Event) (*beat.Event, error) {
 func (*kubernetesAnnotator) String() string { return "add_kubernetes_metadata" }
 
 func validate(config kubeAnnotatorConfig) error {
-	if !config.InCluster && config.KubeConfig == "" {
-		return errors.New("`kube_config` path can't be empty when in_cluster is set to false")
+	if !config.InCluster && config.KubeConfig == "" && config.ApiServer == "" {
+		return errors.New("`kube_config` path or `api_server` can't be empty when in_cluster is set to false")
 	}
 	return nil
+}
+
+func newClient(apiserver, namespace string) (*k8s.Client, error) {
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+
+	client := &k8s.Client{
+		Endpoint:  apiserver,
+		Namespace: namespace,
+		Client: &http.Client{
+			Transport: transport,
+		},
+	}
+	return client, nil
 }
