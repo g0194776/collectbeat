@@ -143,6 +143,9 @@ func (g *GenDefaultMeta) GenerateMetaData(pod *Pod) common.MapStr {
 			"name": pod.Metadata.Name,
 		},
 		"namespace": pod.Metadata.Namespace,
+		"node": common.MapStr{
+			"name": pod.Spec.NodeName,
+		},
 	}
 
 	if len(labelMap) != 0 {

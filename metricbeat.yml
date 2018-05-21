@@ -1,3 +1,4 @@
+# 不在k8s中启动的话，在discovery和processors中加入Host: ${Node}
 metricbeat.config.modules:
   enabled: true
   path: modules.d/*.yml
@@ -8,14 +9,12 @@ metricbeat.config.modules:
 metricbeat.discovery:
   kubernetes:
     namespace: ${NAMESPACE}
-    host: ${NODE}
     api_server: ${APISERVER}
     sync_period: 1m
 
 processors:
 - add_kubernetes_metadata:
     namespace: ${NAMESPACE}
-    host: ${NODE}
     api_server: ${APISERVER}
     sync_period: 1m
 
@@ -24,8 +23,6 @@ fields:
   kubernetes:
     cluster: 
       name: ${CLUSTER}
-    node: 
-      name: ${NODE}
 
 output.elasticsearch:
   hosts: ['${ES_HOST}']

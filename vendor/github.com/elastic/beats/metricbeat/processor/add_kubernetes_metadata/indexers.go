@@ -60,6 +60,7 @@ func (h *IpPortIndexer) GetMetadata(pod *kubernetes.Pod) []kubernetes.MetadataIn
 				if strings.Index(hostPorts[i], fmt.Sprintf("%s:%d", pod.Status.PodIP, port.ContainerPort)) != -1 {
 					containerMeta["container"] = common.MapStr{
 						"name": container.Name,
+						"image": container.Image,
 					}
 					dobreak = true
 					break
