@@ -147,6 +147,11 @@
           description: >
             Kubernetes namespace
 
+        - name: cluster
+          type: object
+          description: >
+            Kubernetes cluster information
+
         - name: labels
           type: object
           description: >
