@@ -24,6 +24,9 @@ fields:
     cluster: 
       name: ${K8S_CLUSTER}
 logging.level: ${MB_LOGLEVEL}
+setup.template.name: "metricbeat-${K8S_CLUSTER}"        #顶格，和output对其
+setup.template.pattern: "metricbeat-${K8S_CLUSTER}-*"   #顶格，和output对其
 output.elasticsearch:
   hosts: ['${ES_HOST}:${ES_PORT}']
+  index: "metricbeat-${K8S_CLUSTER}-%{+yyyy.MM.dd}"
 
