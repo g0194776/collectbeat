@@ -10,13 +10,13 @@ filebeat.discovery:
   kubernetes:
     namespace: ${K8S_NAMESPACE}
     api_server: ${K8S_APISERVER}
-    sync_period: 1m
+    sync_period: ${BEAT_DISCOVERY_PERIOD}
 
 processors:
 - add_kubernetes_metadata:
     namespace: ${K8S_NAMESPACE}
     api_server: ${K8S_APISERVER}
-    sync_period: 1m
+    sync_period: ${K8S_SYNC_PERIOD}
 
 fields_under_root: true
 fields:
@@ -24,5 +24,11 @@ fields:
     cluster: 
       name: ${K8S_CLUSTER}
 logging.level: ${FB_LOGLEVEL}
+setup.template.name: "filebeat-${K8S_CLUSTER}"        #顶格，和output对其
+setup.template.pattern: "filebeat-${K8S_CLUSTER}-*"   #顶格，和output对其
 output.elasticsearch:
   hosts: ['${ES_HOST}:${ES_PORT}']
+  username: ${ES_USERNAME}
+  password: ${ES_PASSWORD}
+  protocal: ${ES_PROTOCOL}
+  index: "metricbeat-${K8S_CLUSTER}-%{+yyyy.MM.dd}"
